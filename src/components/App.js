@@ -44,17 +44,19 @@ const App = () => {
 	useEffect(() => {
 		ipcRenderer.send('users:load') // <= This is to main process know that logs are ready to load
 		ipcRenderer.on('users:get',(e,users) => {
-			setUsers(JSON.parse(users))
+		setUsers(JSON.parse(users))
 		})
 	},[]/*Empty array as no dependency, if there is depedency then we send it here*/)
 	// Adding Element in the above prototype data
-	function addItem(item){
+
+	function addUser(item){
 		if(item.name==='' || item.phoneNumber === '' || item.feeAmount === '')
         {
 			showAlert('Please Enter All Fields','danger')
+			console.log('Masti Kar raya aen')
 			return false;
           //Alert()
-          console.log('Masti Kar raya aen')
+          
         }
 		// item._id= Math.floor(Math.random()*90000)+10000
 		// item.created=new Date().toString()
@@ -62,6 +64,25 @@ const App = () => {
 		// setLogs([...logs, item])
 		ipcRenderer.send('users:add', item)
 		showAlert('User Added !')
+	}
+	function updateUser(item){
+		if(item.name==='' || item.phoneNumber === '' || item.feeAmount === '')
+        {
+			showAlert('Empty Fields Not Allowed! Please Fill','danger')
+			console.log('Masti Kar raya aen')
+			return false;
+        }
+		// item._id= Math.floor(Math.random()*90000)+10000
+		// item.created=new Date().toString()
+		/*...logs means all the logs from exisiting array */
+		// setLogs([...logs, item])
+		console.log('Update in App.js')
+		console.log(item.id)
+		console.log(item.name)
+		console.log(item.phoneNumber)
+		console.log(item.feeAmount)
+		//ipcRenderer.send('users:update', item)
+		showAlert('User Updated !')
 	}
 	function showAlert(message, variant='success', seconds=3000)
 	{
@@ -74,7 +95,7 @@ const App = () => {
 			setAlert({
 				show: false,
 				message: '',
-				varinat: 'success'
+				variant: 'success'
 			})
 		}, seconds)
 	}
@@ -93,12 +114,12 @@ const App = () => {
 	}
 	function unpayFee(_id)
 	{
-				//setLogs(logs.filter((item) => item._id !== id))
+		//setLogs(logs.filter((item) => item._id !== id))
 		ipcRenderer.send('users:unpay', _id)
 	}
 	function deleteFeeDefaulter(_id)
 	{
-				//setLogs(logs.filter((item) => item._id !== id))
+		//setLogs(logs.filter((item) => item._id !== id))
 		ipcRenderer.send('users:deletefeedefaulter', _id)
 	}
 	//Check Fee Status
@@ -140,35 +161,39 @@ const App = () => {
 	  </Col>
 	</Row></Form>
 
-
+let counter=0;
 	return (
 		// <div className='app'>
 		// 	<h1>React Electron Boilerplate</h1>
 		// 	<p>This is a simple boilerplate for using React with Electron</p>
 		// </div>
 		<Container>
-			<RegisterUser addItem={addItem}/>
+			<RegisterUser addUser={addUser}/>
 			{searchTag}
 			{alert.show && <Alert variant={alert.variant}>{alert.message}</Alert>}
 			<Table>
 				<thead>
 					<tr>
+						<th>#</th>
 						<th>Name</th>
 						<th>Phone Number</th>
 						<th>Fee Amount</th>
 						<th>Date Joined</th>
 						<th>Fee Status</th>	
-						<th>Pay Fee</th>		
+						<th>Pay Fee</th>	
+						{/* <th>Click to Edit</th> */}
 						<th>Click to Delete</th>					
 						{/* <th></th> */}
 					</tr>
 				</thead>
 				<tbody>
 					{/*The Code below Iterates to Display the table*/}
-					{ users.map((user) => 
+					{
+						users.map((user) => 
 						(
-							// props of LogItem below are key, log, deleteItem
-							<UserItem key={user._id} user={user} deleteItem={deleteItem} payFee={payFee} unpayFee={unpayFee} deleteFeeDefaulter={deleteFeeDefaulter}/*checkFeeStatus={//checkFeeStatus}*/ />
+							counter++,
+							// props of UserItem below are key, user, deleteItem, payFee ...
+							<UserItem key={user._id} user={user} deleteItem={deleteItem} payFee={payFee} unpayFee={unpayFee} deleteFeeDefaulter={deleteFeeDefaulter} updateUser={updateUser} counter={counter} /*checkFeeStatus={//checkFeeStatus}*/ />
 						)
 					  )
 					}
